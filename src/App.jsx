@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { ToastProvider } from "./context/ToastContext";
 import PhoneFrame from "./components/PhoneFrame";
@@ -9,6 +9,7 @@ import RoleSelectionPage from "./pages/RoleSelectionPage";
 import ManagementDashboard from "./pages/ManagementDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import ParentDashboard from "./pages/ParentDashboard";
 import StudentManagement from "./pages/StudentManagement";
 import StaffManagement from "./pages/StaffManagement";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
@@ -17,6 +18,7 @@ import TeacherMarks from "./pages/TeacherMarks";
 import TeacherAnnouncements from "./pages/TeacherAnnouncements";
 import TimeTableManagement from "./pages/TimeTableManagement";
 import { useState, useEffect } from "react";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const userRole = localStorage.getItem("userRole");
@@ -24,6 +26,30 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   if (!role) return <Navigate to="/role-selection" replace />;
   if (allowedRole && role !== allowedRole) return <Navigate to="/role-selection" replace />;
   return children;
+};
+
+// Navigation Controls Component
+const NavigationControls = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <div className="fixed left-4 top-4 z-50 flex gap-2">
+      <button
+        onClick={() => navigate(-1)}
+        className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-gray-100 transition-all duration-200 border border-gray-200"
+        title="Go Back"
+      >
+        <FaArrowLeft className="text-gray-700" size={18} />
+      </button>
+      <button
+        onClick={() => navigate(1)}
+        className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-gray-100 transition-all duration-200 border border-gray-200"
+        title="Go Forward"
+      >
+        <FaArrowRight className="text-gray-700" size={18} />
+      </button>
+    </div>
+  );
 };
 
 function App() {
@@ -56,13 +82,16 @@ function App() {
       <ToastProvider>
         <Router>
           <div className="relative min-h-screen overflow-hidden">
-            {/* Phone Frame Selector - Left Side */}
+            {/* Back/Forward Navigation Controls - Top Left */}
+            <NavigationControls />
+            
+            {/* Phone Frame Selector - Left Side (Phone Models) */}
             <MobileFrameSelector onFrameChange={handleFrameChange} />
             
-            {/* Theme Color Selector - Right Side */}
+            {/* Theme Color Selector - Right Side (Middle) */}
             <ThemeColorSelector />
             
-            {/* Phone Frame - Dynamic based on selection */}
+            {/* Phone Frame */}
             <PhoneFrame frameConfig={frameConfig}>
               {isSetupCompleted ? (
                 <Routes>
@@ -78,6 +107,7 @@ function App() {
                   <Route path="/teacher/marks" element={<ProtectedRoute allowedRole="faculty"><TeacherMarks /></ProtectedRoute>} />
                   <Route path="/teacher/announcements" element={<ProtectedRoute allowedRole="faculty"><TeacherAnnouncements /></ProtectedRoute>} />
                   <Route path="/student/dashboard" element={<ProtectedRoute allowedRole="student"><StudentDashboard /></ProtectedRoute>} />
+                  <Route path="/parent/dashboard" element={<ProtectedRoute allowedRole="parent"><ParentDashboard /></ProtectedRoute>} />
                 </Routes>
               ) : (
                 <div className="flex items-center justify-center h-full">
